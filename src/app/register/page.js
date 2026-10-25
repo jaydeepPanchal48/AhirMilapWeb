@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Camera, FileText } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { getRegistrationApiUrl } from '@/lib/api';
 import styles from './RegisterPage.module.scss';
 
 export default function RegisterPage() {
@@ -12,6 +13,8 @@ export default function RegisterPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [userImage, setUserImage] = useState(null);
+  const [aadharCard, setAadharCard] = useState(null);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -42,6 +45,16 @@ export default function RegisterPage() {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    const file = files && files[0] ? files[0] : null;
+    if (name === 'userImage') {
+      setUserImage(file);
+    } else if (name === 'aadharCard') {
+      setAadharCard(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.consentAgreed) {
@@ -58,8 +71,11 @@ export default function RegisterPage() {
     setSubmitError('');
     console.log('[Registration] Submitting payload:', payload);
 
+    const apiUrl = getRegistrationApiUrl();
+    console.log('[Registration] Target API URL:', apiUrl);
+
     try {
-      const response = await fetch('https://transporters033-001-site4.anytempurl.com/api/Registration/register', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           accept: '*/*',
@@ -83,14 +99,28 @@ export default function RegisterPage() {
       });
 
       if (!response.ok) {
-        throw new Error(`Registration failed with status ${response.status}`);
+        let errorMsg = `Registration failed with status ${response.status}`;
+        if (responseBody && typeof responseBody === 'object') {
+          if (responseBody.message) {
+            errorMsg = responseBody.message;
+          } else if (responseBody.title) {
+            errorMsg = responseBody.title;
+          } else if (responseBody.errors && typeof responseBody.errors === 'object') {
+            const firstKey = Object.keys(responseBody.errors)[0];
+            const firstErr = responseBody.errors[firstKey];
+            errorMsg = Array.isArray(firstErr) ? firstErr[0] : String(firstErr);
+          }
+        } else if (typeof responseText === 'string' && responseText.trim().startsWith('<')) {
+          errorMsg = `API endpoint returned an HTML page (status ${response.status}). Please verify server routing and API hosting.`;
+        }
+        throw new Error(errorMsg);
       }
 
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('[Registration] Submission error:', error);
-      setSubmitError('We could not submit your registration. Please try again.');
+      setSubmitError(error.message || 'We could not submit your registration. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -356,6 +386,77 @@ export default function RegisterPage() {
               </div>
 
               <div className={styles.sectionBlock}>
+                <h2 className={styles.sectionTitle}>{t('reg_sec_documents')}</h2>
+                <div className={styles.gridTwo}>
+                  {/* Upload Your Image */}
+                  <div className={styles.formGroup}>
+                    <label htmlFor="userImage">{t('field_upload_image')}</label>
+                    <div className={styles.fileUploadCard}>
+                      <input
+                        id="userImage"
+                        name="userImage"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className={styles.fileInput}
+                      />
+                      <label htmlFor="userImage" className={styles.fileUploadDropzone}>
+                        <div className={styles.uploadIconWrapper}>
+                          <Camera size={22} />
+                        </div>
+                        <div className={styles.uploadTextWrapper}>
+                          <span className={styles.uploadMainText}>
+                            {userImage ? userImage.name : t('field_upload_image_btn')}
+                          </span>
+                          <span className={styles.uploadHintText}>
+                            {userImage ? `${(userImage.size / (1024 * 1024)).toFixed(2)} MB` : t('field_upload_image_hint')}
+                          </span>
+                        </div>
+                        {userImage && (
+                          <div className={styles.uploadCheckBadge}>
+                            <CheckCircle2 size={18} />
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Adharcard Upload */}
+                  <div className={styles.formGroup}>
+                    <label htmlFor="aadharCard">{t('field_upload_aadhar')}</label>
+                    <div className={styles.fileUploadCard}>
+                      <input
+                        id="aadharCard"
+                        name="aadharCard"
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={handleFileChange}
+                        className={styles.fileInput}
+                      />
+                      <label htmlFor="aadharCard" className={styles.fileUploadDropzone}>
+                        <div className={styles.uploadIconWrapper}>
+                          <FileText size={22} />
+                        </div>
+                        <div className={styles.uploadTextWrapper}>
+                          <span className={styles.uploadMainText}>
+                            {aadharCard ? aadharCard.name : t('field_upload_aadhar_btn')}
+                          </span>
+                          <span className={styles.uploadHintText}>
+                            {aadharCard ? `${(aadharCard.size / (1024 * 1024)).toFixed(2)} MB` : t('field_upload_aadhar_hint')}
+                          </span>
+                        </div>
+                        {aadharCard && (
+                          <div className={styles.uploadCheckBadge}>
+                            <CheckCircle2 size={18} />
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.sectionBlock}>
                 <h2 className={styles.sectionTitle}>{t('reg_sec_pref')}</h2>
                 <div className={styles.gridTwo}>
                   <div className={`${styles.formGroup} ${styles.fullWidth}`}>
@@ -389,7 +490,11 @@ export default function RegisterPage() {
 
               {/* SUBMIT BUTTON */}
               <div className={styles.submitWrapper}>
-                {submitError && <p role="alert">{submitError}</p>}
+                {submitError && (
+                  <p className={styles.errorMessage} role="alert">
+                    {submitError}
+                  </p>
+                )}
                 <button
                   type="submit"
                   className={styles.submitBtn}

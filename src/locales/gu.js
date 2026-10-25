@@ -201,6 +201,13 @@ export const gu = {
   reg_sec_edu_prof: "શિક્ષણ અને વ્યવસાય",
   reg_sec_lifestyle: "મૂળભૂત જીવનશૈલી",
   reg_sec_pref: "જીવનસાથીની પસંદગી",
+  reg_sec_documents: "ફોટો અને ઓળખ ચકાસણી (Photo & Identity Verification)",
+  field_upload_image: "Upload Your Image (તમારો ફોટો અપલોડ કરો)",
+  field_upload_aadhar: "Adharcard Upload (આધાર કાર્ડ અપલોડ કરો)",
+  field_upload_image_btn: "તમારો ફોટો પસંદ કરો",
+  field_upload_aadhar_btn: "આધાર કાર્ડ પસંદ કરો",
+  field_upload_image_hint: "JPG, PNG અથવા WEBP (મહત્તમ 5MB)",
+  field_upload_aadhar_hint: "PDF, JPG અથવા PNG (મહત્તમ 5MB)",
   reg_sec_add_info: "૬. વધારાની માહિતી",
   reg_sec_contact_pref: "૭. સંપર્કની પસંદગી",
   

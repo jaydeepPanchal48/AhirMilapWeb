@@ -201,6 +201,13 @@ export const en = {
   reg_sec_edu_prof: "Education & Profession",
   reg_sec_lifestyle: "Basic Lifestyle",
   reg_sec_pref: "Partner Preference",
+  reg_sec_documents: "Photo & Identity Verification",
+  field_upload_image: "Upload Your Image",
+  field_upload_aadhar: "Adharcard Upload",
+  field_upload_image_btn: "Choose Your Photo",
+  field_upload_aadhar_btn: "Choose Aadhaar Card",
+  field_upload_image_hint: "JPG, PNG or WEBP (Max 5MB)",
+  field_upload_aadhar_hint: "PDF, JPG or PNG (Max 5MB)",
   reg_sec_add_info: "6. Additional Information",
   reg_sec_contact_pref: "7. Contact Preference",
   
